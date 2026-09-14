@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>POKIX - Play Free Online Games | Play Instantly in Your Browser</title>
+  <meta name="description" content="Play the best free online games on Pokix! Instant play, no downloads needed. Action, Arcade, 2048, Snake, Space Shooters, Brick Breaker, and 2-Player games.">
+  <meta name="keywords" content="online games, poki games, free games, arcade games, html5 games, browser games, unblocked games, flappy bird, 2048, snake">
+  <meta name="theme-color" content="#090c15">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="POKIX - Play Free Online Games">
+  <meta property="og:description" content="Instant play free online games on Pokix. Best games, high scores, and arcade fun.">
+  <meta property="og:type" content="website">
+
+  <!-- Favicon SVG -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='25' fill='%237c3aed'/><path d='M30 40 L70 40 L70 60 L30 60 Z' fill='%23ffffff'/><circle cx='40' cy='50' r='6' fill='%23ec4899'/><circle cx='60' cy='50' r='6' fill='%2306b6d4'/></svg>">
+
+  <!-- Google Fonts: Outfit & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- =========================================================
+       HEADER NAVIGATION
+       ========================================================= -->
+  <header class="navbar" role="banner">
+    <div class="navbar-container">
+      <!-- Brand Logo -->
+      <a href="index.html" class="brand-logo" aria-label="Pokix Home">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M21 6H3c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-10 7H8v3H6v-3H3v-2h3V8h2v3h3v2zm4.5 2c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm4-3c-.83 0-1.5-.67-1.5-1.5S18.67 9 19.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <span class="brand-name">POKIX</span>
+          <span class="brand-sub">ONLINE GAMES</span>
+        </div>
+      </a>
+
+      <!-- Quick Search Bar -->
+      <div class="search-wrapper">
+        <div class="search-input-box">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input 
+            type="search" 
+            id="search-input" 
+            class="search-input" 
+            placeholder="Search games, categories, tags..." 
+            autocomplete="off"
+            aria-label="Search games"
+          >
+          <kbd class="search-kbd" title="Press / to focus search">/</kbd>
+        </div>
+        <!-- Live Autocomplete Dropdown -->
+        <div id="search-results" class="search-results-dropdown" role="listbox"></div>
+      </div>
+
+      <!-- Action Navigation Buttons -->
+      <div class="navbar-actions">
+        <!-- Surprise Me / Shuffle -->
+        <button id="btn-surprise" class="action-btn btn-surprise" title="Surprise Me with a Random Game!">
+          <span class="dice-icon">🎲</span>
+          <span>Surprise Me</span>
+        </button>
+
+        <!-- Player XP Level Chip -->
+        <div id="player-xp-chip" class="player-xp-chip" title="Click to view Achievements and Stats">
+          <span id="xp-level-badge" class="xp-level-badge">LVL 1</span>
+          <div class="xp-info">
+            <span id="xp-text" class="xp-text">50 XP</span>
+            <div class="xp-bar-mini">
+              <div id="xp-bar-mini-fill" class="xp-bar-mini-fill"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Global Sound FX Toggle -->
+        <button id="btn-sound-toggle" class="action-btn" title="Toggle Sound FX" aria-label="Toggle Sound">
+          <span id="sound-icon">🔊</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- =========================================================
+       CATEGORIES FILTER PILLS
+       ========================================================= -->
+  <nav class="categories-bar" aria-label="Game categories">
+    <div class="categories-container">
+      <button class="category-pill active" data-category="all">
+        <span class="pill-emoji">🎮</span> All Games
+      </button>
+      <button class="category-pill" data-category="action">
+        <span class="pill-emoji">🚀</span> Action
+      </button>
+      <button class="category-pill" data-category="racing">
+        <span class="pill-emoji">🏎️</span> Racing
+      </button>
+      <button class="category-pill" data-category="arcade">
+        <span class="pill-emoji">🕹️</span> Arcade
+      </button>
+      <button class="category-pill" data-category="puzzle">
+        <span class="pill-emoji">🧩</span> Puzzle
+      </button>
+      <button class="category-pill" data-category="sports">
+        <span class="pill-emoji">🏀</span> Sports
+      </button>
+      <button class="category-pill" data-category="retro">
+        <span class="pill-emoji">👾</span> Retro
+      </button>
+      <button class="category-pill" data-category="2-player">
+        <span class="pill-emoji">👥</span> 2-Player
+      </button>
+      <button class="category-pill" data-category="favorites">
+        <span class="pill-emoji">❤️</span> Favorites
+      </button>
+    </div>
+  </nav>
+
+  <!-- =========================================================
+       HERO SPOTLIGHT BANNER (GAME OF THE DAY)
+       ========================================================= -->
+  <section class="hero-spotlight" aria-label="Featured Game">
+    <div class="spotlight-card">
+      <div class="spotlight-content">
+        <span class="spotlight-badge">★ GAME OF THE DAY</span>
+        <h1 class="spotlight-title">Galaxy Defender</h1>
+        <p class="spotlight-desc">
+          Pilot your high-tech star fighter across asteroid fields, collect energy shields, unlock triple plasma cannons, and battle relentless waves of alien interceptors.
+        </p>
+        <div class="spotlight-actions">
+          <button id="hero-play-btn" class="btn-play-large">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="6 3 20 12 6 21 6 3"/>
+            </svg>
+            <span>PLAY NOW</span>
+          </button>
+          <div style="display: flex; align-items: center; gap: 0.8rem; color: #a5b4fc; font-weight: 700; font-size: 0.9rem;">
+            <span>★ 4.9 Rating</span>
+            <span>•</span>
+            <span>412K Plays</span>
+          </div>
+        </div>
+      </div>
+      <div class="spotlight-visual">
+        <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="50" cy="50" r="44" fill="rgba(99, 102, 241, 0.25)"/>
+          <path d="M50 15 L66 75 L50 65 L34 75 Z" fill="#6366f1" stroke="#a5b4fc" stroke-width="2.5" stroke-linejoin="round"/>
+          <path d="M50 25 L58 65 L50 58 L42 65 Z" fill="#38bdf8"/>
+          <circle cx="50" cy="45" r="4" fill="#ffffff"/>
+          <polygon points="46,68 54,68 50,88" fill="#f43f5e"/>
+          <circle cx="25" cy="30" r="1.5" fill="#ffffff"/>
+          <circle cx="75" cy="22" r="2" fill="#ffffff"/>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       MAIN BENTO GAME GRID
+       ========================================================= -->
+  <main class="main-content">
+    <div class="section-header">
+      <h2 class="section-title">
+        <span>Popular</span> Games
+      </h2>
+      <span id="games-count" class="games-count">Loading games...</span>
+    </div>
+
+    <!-- Bento Dynamic Grid -->
+    <section id="bento-grid" class="bento-grid" aria-label="Games Catalog">
+      <!-- Dynamically populated by js/app.js -->
+    </section>
+  </main>
+
+  <!-- =========================================================
+       POKI-STYLE GAME ARENA MODAL (THEATER & FULLSCREEN)
+       ========================================================= -->
+  <div id="game-arena" class="game-arena-overlay" role="dialog" aria-modal="true" aria-labelledby="arena-title">
+    <!-- Arena Header -->
+    <header class="arena-header">
+      <div class="arena-game-meta">
+        <button id="arena-back-btn" class="arena-back-btn" title="Back to Games Portal" aria-label="Back">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+        </button>
+        <div class="arena-title-box">
+          <h3 id="arena-title">Game Title</h3>
+          <div id="arena-tags" class="arena-tags"></div>
+        </div>
+      </div>
+
+      <!-- Action Controls -->
+      <div class="arena-actions">
+        <button id="arena-fav-btn" class="arena-action-btn" title="Toggle Favorite">
+          🤍 Favorite
+        </button>
+        <button id="arena-share-btn" class="arena-action-btn" title="Share Game Link">
+          🔗 Share
+        </button>
+        <button id="arena-fullscreen-btn" class="arena-action-btn" title="Toggle Fullscreen">
+          ⛶ Fullscreen
+        </button>
+        <button id="arena-close-btn" class="arena-action-btn arena-close-btn" title="Close Game (Esc)">
+          ✕ Exit
+        </button>
+      </div>
+    </header>
+
+    <!-- Arena Body / Game Canvas Viewport -->
+    <div class="arena-body">
+      <div id="canvas-viewport" class="canvas-viewport">
+        <canvas id="arena-canvas" width="600" height="480"></canvas>
+      </div>
+
+      <!-- Arena Footer / Controls & Feedback -->
+      <div class="arena-footer">
+        <div id="controls-guide" class="controls-guide">
+          <!-- Populated dynamically with control keys -->
+        </div>
+
+        <div class="arena-feedback">
+          <button id="arena-like-btn" class="like-btn" title="Like this game">
+            <span>👍</span>
+            <span id="arena-likes-count">12,450</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       ACHIEVEMENTS & GAMER PROGRESSION MODAL
+       ========================================================= -->
+  <div id="achievements-modal" class="achievements-modal" role="dialog" aria-modal="true">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>🏆 Gamer Achievements</h3>
+        <button id="close-achievements-btn" class="modal-close-btn" aria-label="Close Achievements">✕</button>
+      </div>
+      <div id="achievements-list" class="achievements-list">
+        <!-- Populated dynamically by storage manager -->
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       TOAST NOTIFICATIONS
+       ========================================================= -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <!-- =========================================================
+       FOOTER
+       ========================================================= -->
+  <footer class="footer" role="contentinfo">
+    <div class="footer-container">
+      <div class="footer-brand">
+        <div class="brand-logo" style="cursor: default;">
+          <div class="logo-icon" style="width: 32px; height: 32px;">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M21 6H3c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2z"/>
+            </svg>
+          </div>
+          <span class="brand-name" style="font-size: 1.2rem;">POKIX</span>
+        </div>
+        <p>© 2026 Pokix Gaming Portal. Built with pure HTML5, CSS3, and JavaScript.</p>
+      </div>
+
+      <div class="footer-links">
+        <a href="#bento-grid">Popular Games</a>
+        <a href="#" id="footer-favorites-link">My Favorites</a>
+        <a href="#" id="footer-surprise-link">Random Game</a>
+        <a href="https://github.com" target="_blank" rel="noopener">About</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- =========================================================
+       SCRIPTS (Modular Pure JS Architecture)
+       ========================================================= -->
+  <!-- Audio Engine (Web Audio API Synthesizer) -->
+  <script src="js/audio.js"></script>
+  <!-- Storage & Gamification State Manager -->
+  <script src="js/storage.js"></script>
+  <!-- Games Catalog Data -->
+  <script src="js/games-data.js"></script>
+
+  <!-- Built-in HTML5 Canvas Game Engines -->
+  <script src="js/games/flappy.js"></script>
+  <script src="js/games/game2048.js"></script>
+  <script src="js/games/snake.js"></script>
+  <script src="js/games/space.js"></script>
+  <script src="js/games/breaker.js"></script>
+  <script src="js/games/jumper.js"></script>
+  <script src="js/games/tictactoe.js"></script>
+
+  <!-- 10 New Games (Subway Surfers, Mr Racer & Arcade Hits) -->
+  <script src="js/games/metrosurfer.js"></script>
+  <script src="js/games/highwayracer.js"></script>
+  <script src="js/games/cyberhopper.js"></script>
+  <script src="js/games/cyberpac.js"></script>
+  <script src="js/games/neondunk.js"></script>
+  <script src="js/games/blademaster.js"></script>
+  <script src="js/games/nitrokart.js"></script>
+  <script src="js/games/neonslope.js"></script>
+  <script src="js/games/stack.js"></script>
+  <script src="js/games/bubblepop.js"></script>
+
+  <!-- Main Portal Orchestrator -->
+  <script src="js/app.js"></script>
+
+</body>
+</html>

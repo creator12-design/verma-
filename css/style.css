@@ -1270,3 +1270,389 @@ body {
     align-items: flex-start;
   }
 }
+
+/* =========================================================
+   MOBILE-ONLY VIRTUAL CONTROLLERS & SLIDING CONTROLS
+   Active strictly on mobile screens / touch viewports
+   ========================================================= */
+.mobile-game-controls {
+  display: none !important;
+  width: 100%;
+  max-width: 900px;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.6rem;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  z-index: 100;
+}
+
+@media (max-width: 850px) {
+  .mobile-game-controls {
+    display: flex !important;
+  }
+
+  .canvas-viewport canvas {
+    max-height: 52vh !important;
+  }
+
+  .arena-body {
+    padding: 0.5rem 0.75rem 1.25rem;
+  }
+
+  .arena-footer {
+    margin-top: 0.5rem;
+    padding: 0.6rem 0.9rem;
+  }
+}
+
+/* Airplane Draggable Slider Bar (Fighter Game / Galaxy Defender) */
+.mobile-slider-wrapper {
+  width: 100%;
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  border-radius: var(--radius-xl);
+  padding: 0.6rem 1rem 0.75rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.mobile-slider-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: #a5b4fc;
+}
+
+.mobile-slider-header .slider-hint {
+  color: var(--accent-cyan);
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.mobile-slider-track {
+  position: relative;
+  width: 100%;
+  height: 54px;
+  background: linear-gradient(90deg, rgba(30, 27, 75, 0.9) 0%, rgba(15, 23, 42, 0.95) 50%, rgba(30, 27, 75, 0.9) 100%);
+  border: 1.5px solid rgba(129, 140, 248, 0.4);
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  padding: 0 6px;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.7), 0 0 16px rgba(99, 102, 241, 0.2);
+  cursor: grab;
+  touch-action: none;
+  overflow: hidden;
+}
+
+.mobile-slider-track:active {
+  cursor: grabbing;
+}
+
+.mobile-slider-guide {
+  position: absolute;
+  left: 20px;
+  right: 20px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+.mobile-slider-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, rgba(99, 102, 241, 0.2) 0%, rgba(56, 189, 248, 0.3) 100%);
+  pointer-events: none;
+  transition: width 0.04s ease-out;
+}
+
+.mobile-slider-thumb {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 62px;
+  height: 44px;
+  border-radius: 22px;
+  background: linear-gradient(135deg, #6366f1 0%, #38bdf8 100%);
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.8), 0 4px 12px rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  transition: transform 0.08s ease, box-shadow 0.12s ease;
+  will-change: left, transform;
+}
+
+.mobile-slider-thumb svg {
+  width: 26px;
+  height: 26px;
+  fill: #ffffff;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
+  pointer-events: none;
+}
+
+.mobile-slider-track.active .mobile-slider-thumb,
+.mobile-slider-thumb:active {
+  transform: translate(-50%, -50%) scale(1.1);
+  box-shadow: 0 0 30px rgba(56, 189, 248, 1), 0 6px 16px rgba(0, 0, 0, 0.8);
+  border-color: #f8fafc;
+}
+
+/* Left / Right & Action Button Grid Layout */
+.mobile-buttons-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 0.75rem;
+}
+
+.mobile-btn-cluster {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.mobile-btn-cluster-left {
+  justify-content: flex-start;
+}
+
+.mobile-btn-cluster-right {
+  justify-content: flex-end;
+}
+
+.mobile-btn-cluster-center {
+  justify-content: center;
+}
+
+/* Base Virtual Touch Button */
+.mobile-btn {
+  appearance: none;
+  -webkit-appearance: none;
+  background: rgba(18, 24, 40, 0.85);
+  border: 1.5px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  color: var(--text-main);
+  height: 56px;
+  min-width: 64px;
+  padding: 0 1rem;
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.08s ease, background 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease;
+}
+
+.mobile-btn svg {
+  width: 22px;
+  height: 22px;
+  fill: currentColor;
+  flex-shrink: 0;
+  pointer-events: none;
+}
+
+.mobile-btn:active,
+.mobile-btn.active {
+  transform: scale(0.92);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+}
+
+/* Directional Buttons (Left / Right) */
+.mobile-btn-dir {
+  flex: 1;
+  max-width: 115px;
+  background: rgba(30, 41, 59, 0.85);
+  border-color: rgba(56, 189, 248, 0.4);
+  color: #38bdf8;
+}
+
+.mobile-btn-dir:active,
+.mobile-btn-dir.active {
+  background: rgba(56, 189, 248, 0.25);
+  border-color: #38bdf8;
+  box-shadow: 0 0 18px rgba(56, 189, 248, 0.5);
+  color: #ffffff;
+}
+
+/* Nitro Boost Button */
+.mobile-btn-nitro {
+  flex: 1;
+  background: linear-gradient(135deg, rgba(244, 63, 94, 0.25) 0%, rgba(245, 158, 11, 0.3) 100%);
+  border-color: rgba(244, 63, 94, 0.6);
+  color: #fbbf24;
+}
+
+.mobile-btn-nitro:active,
+.mobile-btn-nitro.active {
+  background: linear-gradient(135deg, #f43f5e 0%, #f59e0b 100%);
+  border-color: #ffffff;
+  color: #ffffff;
+  box-shadow: 0 0 24px rgba(244, 63, 94, 0.8);
+}
+
+/* Brake Button */
+.mobile-btn-brake {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.5);
+  color: #f87171;
+}
+
+.mobile-btn-brake:active,
+.mobile-btn-brake.active {
+  background: #ef4444;
+  border-color: #ffffff;
+  color: #ffffff;
+  box-shadow: 0 0 18px rgba(239, 68, 68, 0.7);
+}
+
+/* Fire / Laser / Weapon Button */
+.mobile-btn-fire {
+  flex: 1;
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.3) 0%, rgba(6, 182, 212, 0.3) 100%);
+  border-color: rgba(124, 58, 237, 0.6);
+  color: #a5b4fc;
+}
+
+.mobile-btn-fire:active,
+.mobile-btn-fire.active {
+  background: linear-gradient(135deg, #7c3aed 0%, #06b6d4 100%);
+  border-color: #ffffff;
+  color: #ffffff;
+  box-shadow: 0 0 22px rgba(124, 58, 237, 0.8);
+}
+
+/* Gas / Accelerate Button */
+.mobile-btn-gas {
+  background: rgba(16, 185, 129, 0.2);
+  border-color: rgba(16, 185, 129, 0.5);
+  color: #34d399;
+}
+
+.mobile-btn-gas:active,
+.mobile-btn-gas.active {
+  background: #10b981;
+  border-color: #ffffff;
+  color: #ffffff;
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.8);
+}
+
+/* Jump Button */
+.mobile-btn-jump {
+  background: rgba(16, 185, 129, 0.2);
+  border-color: rgba(16, 185, 129, 0.5);
+  color: #34d399;
+}
+
+.mobile-btn-jump:active,
+.mobile-btn-jump.active {
+  background: #10b981;
+  border-color: #ffffff;
+  color: #ffffff;
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.8);
+}
+
+/* Slide Button */
+.mobile-btn-slide {
+  background: rgba(14, 165, 233, 0.2);
+  border-color: rgba(14, 165, 233, 0.5);
+  color: #38bdf8;
+}
+
+.mobile-btn-slide:active,
+.mobile-btn-slide.active {
+  background: #0284c7;
+  border-color: #ffffff;
+  color: #ffffff;
+  box-shadow: 0 0 20px rgba(14, 165, 233, 0.8);
+}
+
+/* Large Single Action Tap Button (Flappy, Stack, Blade) */
+.mobile-btn-action-large {
+  width: 100%;
+  height: 60px;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.3) 0%, rgba(236, 72, 153, 0.3) 100%);
+  border-color: rgba(236, 72, 153, 0.6);
+  color: #ffffff;
+  font-size: 1.1rem;
+  letter-spacing: 0.05em;
+}
+
+.mobile-btn-action-large:active,
+.mobile-btn-action-large.active {
+  background: linear-gradient(135deg, #6366f1 0%, #ec4899 100%);
+  box-shadow: 0 0 25px rgba(236, 72, 153, 0.8);
+}
+
+/* 4-Way D-Pad Layout (Maze, Crossy, Snake) */
+.mobile-dpad-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 1rem;
+}
+
+.mobile-dpad {
+  display: grid;
+  grid-template-columns: repeat(3, 52px);
+  grid-template-rows: repeat(3, 50px);
+  gap: 5px;
+}
+
+.mobile-dpad-btn {
+  background: rgba(30, 41, 59, 0.85);
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-sm);
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  touch-action: none;
+  font-size: 1.1rem;
+  font-weight: 800;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.08s ease, background 0.1s ease;
+}
+
+.mobile-dpad-btn:active,
+.mobile-dpad-btn.active {
+  background: var(--accent-cyan);
+  color: #0f172a;
+  transform: scale(0.92);
+}
+
+.mobile-dpad-up { grid-column: 2; grid-row: 1; }
+.mobile-dpad-left { grid-column: 1; grid-row: 2; }
+.mobile-dpad-center { grid-column: 2; grid-row: 2; opacity: 0.1; pointer-events: none; border-radius: var(--radius-full); }
+.mobile-dpad-right { grid-column: 3; grid-row: 2; }
+.mobile-dpad-down { grid-column: 2; grid-row: 3; }
+

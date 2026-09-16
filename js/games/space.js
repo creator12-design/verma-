@@ -152,6 +152,27 @@ class GalaxyDefenderGame {
     if (this.onScoreUpdate) this.onScoreUpdate(this.score);
   }
 
+  setNormalizedX(ratio) {
+    if (this.gameState === 'idle') {
+      this.gameState = 'playing';
+      this.loop();
+    } else if (this.gameState === 'gameover') {
+      this.reset();
+      this.gameState = 'playing';
+      this.loop();
+    }
+    const clamped = Math.max(0, Math.min(1, ratio));
+    const minX = 25;
+    const maxX = this.width - 25;
+    this.player.x = minX + clamped * (maxX - minX);
+  }
+
+  getNormalizedX() {
+    const minX = 25;
+    const maxX = this.width - 25;
+    return Math.max(0, Math.min(1, (this.player.x - minX) / (maxX - minX)));
+  }
+
   fireBullet() {
     const now = performance.now();
     if (now - this.lastShotTime < this.fireRate) return;

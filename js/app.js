@@ -30,6 +30,8 @@ class ArcadeApp {
     this.searchQuery = '';
     this.activeGameInstance = null;
     this.activeGameData = null;
+    this.activeMobileButtonCleanups = [];
+    this.mobileSliderSyncRaf = null;
 
     this.initElements();
     this.bindEvents();
@@ -64,6 +66,7 @@ class ArcadeApp {
     this.arenaLikesCount = document.getElementById('arena-likes-count');
     this.arenaShareBtn = document.getElementById('arena-share-btn');
     this.gamesCountBadge = document.getElementById('games-count');
+    this.mobileControls = document.getElementById('mobile-game-controls');
 
     // Sync audio icon state
     this.updateSoundIcon();
@@ -442,9 +445,14 @@ class ArcadeApp {
     } else {
       console.error(`Engine ${game.engine} not loaded.`);
     }
+
+    // Initialize mobile-only virtual controls for this game
+    this.setupMobileControls(game.id);
   }
 
   closeGameArena() {
+    this.teardownMobileControls();
+
     if (this.activeGameInstance && typeof this.activeGameInstance.destroy === 'function') {
       this.activeGameInstance.destroy();
       this.activeGameInstance = null;
@@ -501,6 +509,390 @@ class ArcadeApp {
 
   closeAchievements() {
     this.achievementsModal.classList.remove('active');
+  }
+
+  pressVirtualKey(code) {
+    if (this.activeGameInstance) {
+      if (this.activeGameInstance.keys) {
+        this.activeGameInstance.keys[code] = true;
+      }
+      if (this.activeGameInstance.gameState === 'idle' && typeof this.activeGameInstance.loop === 'function') {
+        this.activeGameInstance.gameState = 'playing';
+        this.activeGameInstance.loop();
+      } else if (this.activeGameInstance.gameState === 'gameover' && typeof this.activeGameInstance.reset === 'function') {
+        this.activeGameInstance.reset();
+        this.activeGameInstance.gameState = 'playing';
+        this.activeGameInstance.loop();
+      } else if (this.activeGameInstance.gameState === 'victory' && typeof this.activeGameInstance.reset === 'function') {
+        this.activeGameInstance.reset();
+        this.activeGameInstance.gameState = 'playing';
+        this.activeGameInstance.loop();
+      }
+    }
+    window.dispatchEvent(new KeyboardEvent('keydown', { code: code, key: code, bubbles: true, cancelable: true }));
+  }
+
+  releaseVirtualKey(code) {
+    if (this.activeGameInstance && this.activeGameInstance.keys) {
+      this.activeGameInstance.keys[code] = false;
+    }
+    window.dispatchEvent(new KeyboardEvent('keyup', { code: code, key: code, bubbles: true, cancelable: true }));
+  }
+
+  setupMobileControls(gameId) {
+    if (!this.mobileControls) return;
+    this.teardownMobileControls();
+
+    let html = '';
+    const isFighter = (gameId === 'galaxy-defender');
+    const isHighwayRacer = (gameId === 'highway-racer');
+    const isNitroKart = (gameId === 'nitro-kart');
+    const isSlope = (gameId === 'neon-slope');
+    const isBreaker = (gameId === 'brick-breaker');
+    const isJumper = (gameId === 'cosmic-jumper');
+    const isMetroSurfer = (gameId === 'metro-surfer');
+    const isDpadGame = ['cyber-hopper', 'cyber-pac', 'neon-serpent', 'game-2048'].includes(gameId);
+    const isSingleTap = ['cyber-dash', 'blade-master', 'skyscraper-stack'].includes(gameId);
+
+    if (isFighter) {
+      // Galaxy Defender: Sliding button to control airplane + Left/Right buttons + Rapid Fire
+      html = `
+        <div class="mobile-slider-wrapper">
+          <div class="mobile-slider-header">
+            <span>✈️ AIRPLANE SLIDER CONTROLLER</span>
+            <span class="slider-hint">SLIDE TO FLY AIRPLANE</span>
+          </div>
+          <div class="mobile-slider-track" id="airplane-slider-track">
+            <div class="mobile-slider-guide"></div>
+            <div class="mobile-slider-fill" id="airplane-slider-fill"></div>
+            <div class="mobile-slider-thumb" id="airplane-slider-thumb" title="Drag to steer airplane">
+              <svg viewBox="0 0 24 24"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg>
+            </div>
+          </div>
+        </div>
+        <div class="mobile-buttons-row">
+          <div class="mobile-btn-cluster mobile-btn-cluster-left">
+            <button type="button" class="mobile-btn mobile-btn-dir mobile-btn-left" data-key="ArrowLeft" aria-label="Steer Airplane Left">
+              <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+              <span>LEFT</span>
+            </button>
+            <button type="button" class="mobile-btn mobile-btn-dir mobile-btn-right" data-key="ArrowRight" aria-label="Steer Airplane Right">
+              <span>RIGHT</span>
+              <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+            </button>
+          </div>
+          <div class="mobile-btn-cluster mobile-btn-cluster-right">
+            <button type="button" class="mobile-btn mobile-btn-fire" data-key="Space" aria-label="Fire Plasma Laser">
+              <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              <span>⚡ FIRE</span>
+            </button>
+          </div>
+        </div>
+      `;
+    } else if (isHighwayRacer) {
+      // Apex Highway Racer: Left & Right buttons + Nitro + Brake
+      html = `
+        <div class="mobile-buttons-row">
+          <div class="mobile-btn-cluster mobile-btn-cluster-left">
+            <button type="button" class="mobile-btn mobile-btn-dir mobile-btn-left" data-key="ArrowLeft" aria-label="Steer Left">
+              <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+              <span>LEFT</span>
+            </button>
+            <button type="button" class="mobile-btn mobile-btn-dir mobile-btn-right" data-key="ArrowRight" aria-label="Steer Right">
+              <span>RIGHT</span>
+              <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+            </button>
+          </div>
+          <div class="mobile-btn-cluster mobile-btn-cluster-right">
+            <button type="button" class="mobile-btn mobile-btn-brake" data-key="ArrowDown" aria-label="Emergency Brake">
+              <span>🛑 BRAKE</span>
+            </button>
+            <button type="button" class="mobile-btn mobile-btn-nitro" data-key="ArrowUp" aria-label="Nitro Boost 280+ km/h">
+              <span>🔥 NITRO</span>
+            </button>
+          </div>
+        </div>
+      `;
+    } else if (isNitroKart) {
+      // Nitro Kart Frenzy: Left & Right buttons + Gas + Brake + Weapon
+      html = `
+        <div class="mobile-buttons-row">
+          <div class="mobile-btn-cluster mobile-btn-cluster-left">
+            <button type="button" class="mobile-btn mobile-btn-dir mobile-btn-left" data-key="ArrowLeft" aria-label="Steer Left">
+              <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+              <span>LEFT</span>
+            </button>
+            <button type="button" class="mobile-btn mobile-btn-dir mobile-btn-right" data-key="ArrowRight" aria-label="Steer Right">
+              <span>RIGHT</span>
+              <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+            </button>
+          </div>
+          <div class="mobile-btn-cluster mobile-btn-cluster-right">
+            <button type="button" class="mobile-btn mobile-btn-brake" data-key="ArrowDown" aria-label="Brake">
+              <span>🛑</span>
+            </button>
+            <button type="button" class="mobile-btn mobile-btn-gas" data-key="ArrowUp" aria-label="Gas Acceleration">
+              <span>⚡ GAS</span>
+            </button>
+            <button type="button" class="mobile-btn mobile-btn-fire" data-key="Space" aria-label="Launch Weapon">
+              <span>🚀 ITEM</span>
+            </button>
+          </div>
+        </div>
+      `;
+    } else if (isMetroSurfer) {
+      // Metro Surfer: Left & Right Lane switch + Jump + Slide
+      html = `
+        <div class="mobile-buttons-row">
+          <div class="mobile-btn-cluster mobile-btn-cluster-left">
+            <button type="button" class="mobile-btn mobile-btn-dir mobile-btn-left" data-key="ArrowLeft" aria-label="Left Lane">
+              <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+              <span>LANE</span>
+            </button>
+            <button type="button" class="mobile-btn mobile-btn-dir mobile-btn-right" data-key="ArrowRight" aria-label="Right Lane">
+              <span>LANE</span>
+              <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+            </button>
+          </div>
+          <div class="mobile-btn-cluster mobile-btn-cluster-right">
+            <button type="button" class="mobile-btn mobile-btn-jump" data-key="ArrowUp" aria-label="Jump">
+              <span>⬆ JUMP</span>
+            </button>
+            <button type="button" class="mobile-btn mobile-btn-slide" data-key="ArrowDown" aria-label="Slide">
+              <span>⬇ SLIDE</span>
+            </button>
+          </div>
+        </div>
+      `;
+    } else if (isSlope || isJumper) {
+      // Neon Slope & Cosmic Jumper: Left & Right steering
+      html = `
+        <div class="mobile-buttons-row">
+          <div class="mobile-btn-cluster mobile-btn-cluster-center" style="gap: 1.5rem;">
+            <button type="button" class="mobile-btn mobile-btn-dir mobile-btn-left" style="max-width: 140px; height: 60px;" data-key="ArrowLeft" aria-label="Steer Left">
+              <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+              <span>STEER LEFT</span>
+            </button>
+            <button type="button" class="mobile-btn mobile-btn-dir mobile-btn-right" style="max-width: 140px; height: 60px;" data-key="ArrowRight" aria-label="Steer Right">
+              <span>STEER RIGHT</span>
+              <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+            </button>
+          </div>
+        </div>
+      `;
+    } else if (isBreaker) {
+      // Brick Breaker DX: Left & Right paddle + Launch
+      html = `
+        <div class="mobile-buttons-row">
+          <div class="mobile-btn-cluster mobile-btn-cluster-left">
+            <button type="button" class="mobile-btn mobile-btn-dir mobile-btn-left" data-key="ArrowLeft" aria-label="Paddle Left">
+              <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+              <span>LEFT</span>
+            </button>
+            <button type="button" class="mobile-btn mobile-btn-dir mobile-btn-right" data-key="ArrowRight" aria-label="Paddle Right">
+              <span>RIGHT</span>
+              <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+            </button>
+          </div>
+          <div class="mobile-btn-cluster mobile-btn-cluster-right">
+            <button type="button" class="mobile-btn mobile-btn-fire" data-key="Space" aria-label="Launch Ball">
+              <span>🚀 LAUNCH</span>
+            </button>
+          </div>
+        </div>
+      `;
+    } else if (isDpadGame) {
+      // 4-Way D-Pad
+      html = `
+        <div class="mobile-dpad-container">
+          <div class="mobile-dpad">
+            <button type="button" class="mobile-dpad-btn mobile-dpad-up" data-key="ArrowUp" aria-label="Up">▲</button>
+            <button type="button" class="mobile-dpad-btn mobile-dpad-left" data-key="ArrowLeft" aria-label="Left">◀</button>
+            <div class="mobile-dpad-btn mobile-dpad-center"></div>
+            <button type="button" class="mobile-dpad-btn mobile-dpad-right" data-key="ArrowRight" aria-label="Right">▶</button>
+            <button type="button" class="mobile-dpad-btn mobile-dpad-down" data-key="ArrowDown" aria-label="Down">▼</button>
+          </div>
+          <div class="mobile-btn-cluster mobile-btn-cluster-right">
+            <button type="button" class="mobile-btn mobile-btn-nitro" data-key="Space" style="height: 60px; min-width: 120px;" aria-label="Action / Turbo">
+              <span>⚡ ACTION</span>
+            </button>
+          </div>
+        </div>
+      `;
+    } else if (isSingleTap) {
+      html = `
+        <div class="mobile-buttons-row">
+          <button type="button" class="mobile-btn mobile-btn-action-large" data-key="Space" aria-label="Tap Action">
+            <span>TAP / FLAP / STACK 🎯</span>
+          </button>
+        </div>
+      `;
+    } else {
+      // Default: Left & Right + Action
+      html = `
+        <div class="mobile-buttons-row">
+          <div class="mobile-btn-cluster mobile-btn-cluster-left">
+            <button type="button" class="mobile-btn mobile-btn-dir mobile-btn-left" data-key="ArrowLeft" aria-label="Left">
+              <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+              <span>LEFT</span>
+            </button>
+            <button type="button" class="mobile-btn mobile-btn-dir mobile-btn-right" data-key="ArrowRight" aria-label="Right">
+              <span>RIGHT</span>
+              <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+            </button>
+          </div>
+          <div class="mobile-btn-cluster mobile-btn-cluster-right">
+            <button type="button" class="mobile-btn mobile-btn-fire" data-key="Space" aria-label="Action">
+              <span>⚡ ACTION</span>
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    this.mobileControls.innerHTML = html;
+
+    // Attach button listeners
+    const buttons = this.mobileControls.querySelectorAll('button[data-key]');
+    buttons.forEach(btn => {
+      const key = btn.dataset.key;
+      let repeatTimer = null;
+
+      const handlePress = (e) => {
+        if (e.cancelable) e.preventDefault();
+        btn.classList.add('active');
+        this.pressVirtualKey(key);
+        if (window.soundEngine) window.soundEngine.playHover();
+
+        // Repeat for games like metro surfer or hopper
+        clearInterval(repeatTimer);
+        repeatTimer = setInterval(() => {
+          this.pressVirtualKey(key);
+        }, 180);
+      };
+
+      const handleRelease = (e) => {
+        btn.classList.remove('active');
+        clearInterval(repeatTimer);
+        this.releaseVirtualKey(key);
+      };
+
+      btn.addEventListener('pointerdown', handlePress);
+      btn.addEventListener('pointerup', handleRelease);
+      btn.addEventListener('pointercancel', handleRelease);
+      btn.addEventListener('pointerleave', handleRelease);
+
+      this.activeMobileButtonCleanups.push(() => {
+        clearInterval(repeatTimer);
+        btn.removeEventListener('pointerdown', handlePress);
+        btn.removeEventListener('pointerup', handleRelease);
+        btn.removeEventListener('pointercancel', handleRelease);
+        btn.removeEventListener('pointerleave', handleRelease);
+      });
+    });
+
+    // Handle Galaxy Defender Airplane Slider
+    if (isFighter) {
+      const track = document.getElementById('airplane-slider-track');
+      const thumb = document.getElementById('airplane-slider-thumb');
+      const fill = document.getElementById('airplane-slider-fill');
+
+      if (track && thumb && fill) {
+        let isDragging = false;
+        let autoFireTimer = null;
+
+        const updatePosition = (clientX) => {
+          const rect = track.getBoundingClientRect();
+          const x = Math.max(0, Math.min(rect.width, clientX - rect.left));
+          const ratio = rect.width > 0 ? (x / rect.width) : 0.5;
+
+          thumb.style.left = `${ratio * 100}%`;
+          fill.style.width = `${ratio * 100}%`;
+
+          if (this.activeGameInstance && typeof this.activeGameInstance.setNormalizedX === 'function') {
+            this.activeGameInstance.setNormalizedX(ratio);
+            this.activeGameInstance.fireBullet();
+          }
+        };
+
+        const onPointerDown = (e) => {
+          if (e.cancelable) e.preventDefault();
+          isDragging = true;
+          track.classList.add('active');
+          if (track.setPointerCapture) {
+            try { track.setPointerCapture(e.pointerId); } catch (_) {}
+          }
+          updatePosition(e.clientX);
+
+          // Continuous fire while sliding/touching
+          clearInterval(autoFireTimer);
+          autoFireTimer = setInterval(() => {
+            if (isDragging && this.activeGameInstance && typeof this.activeGameInstance.fireBullet === 'function') {
+              this.activeGameInstance.fireBullet();
+            }
+          }, 160);
+        };
+
+        const onPointerMove = (e) => {
+          if (!isDragging) return;
+          if (e.cancelable) e.preventDefault();
+          updatePosition(e.clientX);
+        };
+
+        const onPointerUp = (e) => {
+          isDragging = false;
+          track.classList.remove('active');
+          clearInterval(autoFireTimer);
+          if (track.releasePointerCapture) {
+            try { track.releasePointerCapture(e.pointerId); } catch (_) {}
+          }
+        };
+
+        track.addEventListener('pointerdown', onPointerDown);
+        track.addEventListener('pointermove', onPointerMove);
+        track.addEventListener('pointerup', onPointerUp);
+        track.addEventListener('pointercancel', onPointerUp);
+
+        // Keep slider thumb synced if player uses Left/Right buttons
+        const syncSliderWithGame = () => {
+          if (!isDragging && this.activeGameInstance && typeof this.activeGameInstance.getNormalizedX === 'function') {
+            const currentRatio = this.activeGameInstance.getNormalizedX();
+            thumb.style.left = `${currentRatio * 100}%`;
+            fill.style.width = `${currentRatio * 100}%`;
+          }
+          this.mobileSliderSyncRaf = requestAnimationFrame(syncSliderWithGame);
+        };
+        this.mobileSliderSyncRaf = requestAnimationFrame(syncSliderWithGame);
+
+        this.activeMobileButtonCleanups.push(() => {
+          isDragging = false;
+          clearInterval(autoFireTimer);
+          if (this.mobileSliderSyncRaf) cancelAnimationFrame(this.mobileSliderSyncRaf);
+          track.removeEventListener('pointerdown', onPointerDown);
+          track.removeEventListener('pointermove', onPointerMove);
+          track.removeEventListener('pointerup', onPointerUp);
+          track.removeEventListener('pointercancel', onPointerUp);
+        });
+      }
+    }
+  }
+
+  teardownMobileControls() {
+    if (this.mobileSliderSyncRaf) {
+      cancelAnimationFrame(this.mobileSliderSyncRaf);
+      this.mobileSliderSyncRaf = null;
+    }
+    if (this.activeMobileButtonCleanups) {
+      this.activeMobileButtonCleanups.forEach(fn => fn());
+      this.activeMobileButtonCleanups = [];
+    }
+    // Release any stuck keys
+    ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Space'].forEach(key => {
+      this.releaseVirtualKey(key);
+    });
+    if (this.mobileControls) {
+      this.mobileControls.innerHTML = '';
+    }
   }
 }
 

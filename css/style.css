@@ -1276,7 +1276,7 @@ body {
    Active strictly on mobile screens / touch viewports
    ========================================================= */
 .mobile-game-controls {
-  display: none !important;
+  display: none;
   width: 100%;
   max-width: 900px;
   flex-direction: column;
@@ -1288,9 +1288,26 @@ body {
   z-index: 100;
 }
 
+.mobile-game-controls.force-show-mobile,
+body.mobile-mode-active .mobile-game-controls {
+  display: flex !important;
+}
+
+.arena-action-btn.active,
+.action-btn.active {
+  background: rgba(56, 189, 248, 0.22) !important;
+  border-color: #38bdf8 !important;
+  color: #38bdf8 !important;
+  box-shadow: 0 0 14px rgba(56, 189, 248, 0.45) !important;
+}
+
 @media (max-width: 850px) {
   .mobile-game-controls {
-    display: flex !important;
+    display: flex;
+  }
+
+  .mobile-game-controls.force-hide-mobile {
+    display: none !important;
   }
 
   .canvas-viewport canvas {

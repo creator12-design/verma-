@@ -67,9 +67,13 @@ class ArcadeApp {
     this.arenaShareBtn = document.getElementById('arena-share-btn');
     this.gamesCountBadge = document.getElementById('games-count');
     this.mobileControls = document.getElementById('mobile-game-controls');
+    this.arenaMobileBtn = document.getElementById('arena-mobile-btn');
+    this.navMobileBtn = document.getElementById('btn-mobile-toggle');
+    this.mobileModeActive = (window.innerWidth <= 850);
 
     // Sync audio icon state
     this.updateSoundIcon();
+    this.updateMobileButtonsState();
   }
 
   bindEvents() {
@@ -155,6 +159,13 @@ class ArcadeApp {
         document.exitFullscreen();
       }
     });
+
+    if (this.arenaMobileBtn) {
+      this.arenaMobileBtn.addEventListener('click', () => this.toggleMobileMode());
+    }
+    if (this.navMobileBtn) {
+      this.navMobileBtn.addEventListener('click', () => this.toggleMobileMode());
+    }
 
     this.arenaFavBtn.addEventListener('click', () => {
       if (!this.activeGameData) return;
@@ -511,6 +522,29 @@ class ArcadeApp {
     this.achievementsModal.classList.remove('active');
   }
 
+  updateMobileButtonsState() {
+    const label = this.mobileModeActive ? '📱 Mobile Controls: ON' : '📱 Mobile Controls';
+    if (this.arenaMobileBtn) {
+      this.arenaMobileBtn.classList.toggle('active', this.mobileModeActive);
+      this.arenaMobileBtn.textContent = label;
+    }
+    if (this.navMobileBtn) {
+      this.navMobileBtn.classList.toggle('active', this.mobileModeActive);
+      this.navMobileBtn.textContent = label;
+    }
+    if (this.mobileControls) {
+      this.mobileControls.classList.toggle('force-show-mobile', this.mobileModeActive);
+      this.mobileControls.classList.toggle('force-hide-mobile', !this.mobileModeActive);
+    }
+  }
+
+  toggleMobileMode() {
+    this.mobileModeActive = !this.mobileModeActive;
+    this.updateMobileButtonsState();
+    if (window.soundEngine) window.soundEngine.playClick();
+    window.showToast(this.mobileModeActive ? '📱 Mobile controls enabled!' : 'Mobile controls disabled.');
+  }
+
   pressVirtualKey(code) {
     if (this.activeGameInstance) {
       if (this.activeGameInstance.keys) {
@@ -751,6 +785,7 @@ class ArcadeApp {
     }
 
     this.mobileControls.innerHTML = html;
+    this.updateMobileButtonsState();
 
     // Attach button listeners
     const buttons = this.mobileControls.querySelectorAll('button[data-key]');
